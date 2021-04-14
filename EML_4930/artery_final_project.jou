@@ -1,0 +1,69 @@
+/file/read-case artery_base_case_file.cas.h5
+
+;##########   MODEL & SOLVER SETTINGS   ##########;
+/define/models/viscous/kw-sst yes
+/define/models/solver/pressure-based yes
+/define/models> steady? yes ;STEADY STATE
+
+;##########   MATERIAL SETTINGS   ##########;
+/define/materials/change-create blood blood no no no yes constant 1050 no no no ;CHANGE VISCOSITY MODEL HERE
+
+;##########   VELOCITY INLET SETTINGS  ##########;
+/define/boundary-conditions/velocity-inlet 15 no no yes yes no 1.2 no 0 no yes 3 .012
+
+;##########   PRESSURE OUTLET SETTINGS  ##########;
+/define/boundary-conditions/pressure-outlet 16 yes no 13332 no yes no no yes 5 10 yes no no no
+/define/boundary-conditions/pressure-outlet 17 yes no 13332 no yes no no yes 5 10 yes no no no
+
+;### SET SOLVER ###; -- current run: COUPLED
+;/solve/set/p-v-coupling 20 ;SIMPLE
+;/solve/set/p-v-coupling 21 ;SIMPLEC
+;/solve/set/p-v-coupling 22 ;PISO
+/solve/set/p-v-coupling 24 ;Coupled
+
+
+;##########   FOR SIMPLE & COUPLED SOLVER   ##########;
+/solve/set/discretization-scheme/pressure 12 ;SECOND ORDER PRESSURE 
+/solve/set/discretization-scheme/mom 1 ;SECOND ORDER MOMENTUM
+/solve/set/discretization-scheme/k 1 ;SECOND ORDER TURBULENT KINETIC ENERGY
+/solve/set/discretization-scheme/omega 1 ;SECOND ORDER SPECIFIC DISSIPATION RATE
+
+
+;##########   INITIALIZE CASE   ##########;
+/solve/initialize/hyb-initialization
+
+;##########   SOLVE STEADY STATE  ##########;
+/solve/iterate 2000
+
+;##########   SAVE STEADY STATE  ##########;
+file/write-case-data "Newtownian_Steady_State.cas.h5"
+
+;##########   SET TRANSIENT FORM  ##########;
+/define/models/u2ob yes ;UNSTEADY 2ND ORDER BOUNDED TRANSIENT FORMULATION
+
+;##########   TRANSIENT VELOCITY INLET SETTINGS  ##########;
+/define/boundary-conditions/velocity-inlet 15 no no yes yes yes yes yes no 0 no yes 3 0.012
+
+;##########   PRESSURE OUTLET SETTINGS  ##########;
+/define/boundary-conditions/pressure-outlet 16 yes no 13332 no yes no no yes 5 10 yes no no no
+/define/boundary-conditions/pressure-outlet 17 yes no 13332 no yes no no yes 5 10 yes no no no
+
+;##########   TRANSIENT SOLUTION NORMALIZATION MATH ##########;
+;period 0.5s
+;time step = 0.01 sec/step
+;300 steps
+;real time = 3 seconds
+;period length = 0.5s
+;number of periods = 6
+
+;##########   TRANSIENT SOLUTION NORMALIZATION SETTINGS ##########;
+/solve/set/time-step 0.01 ;time step size (seconds/step)
+/solve/set/max-iterations-per-time-step 200
+/solve/set/reporting-interval 1
+/solve/dual-time-iterate 300 200 ;[max timesteps, iterations per step]
+
+
+/file/write-case-data "Newtownian_Transient_Norm.cas.h5"
+
+
+exit
