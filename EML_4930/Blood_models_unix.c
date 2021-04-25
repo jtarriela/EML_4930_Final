@@ -13,30 +13,23 @@ real mu_o = 0.056; /*zero shear*/
 real mu_inf = 0.0035; /* inf shear*/
 real lambda = 3.313; /* time constant */
 real A = 2;
-mu_cy = mu_inf+((mu_o-mu_inf)/pow((1+pow(lambda*C_STRAIN_RATE_MAG(c,t),A)),(1-n)/A));
+mu_cy = mu_inf+((mu_o-mu_inf)/pow(  (1+pow(lambda*C_STRAIN_RATE_MAG(c,t),A)),(1-n)/A));
 return mu_cy;
 }
 
 DEFINE_PROPERTY(Casson_model,c,t)
 {
 /*Hematocrit = 0.4*/
-real mu_p = 0.00145;
-real Hct = .04;
+real yield_stress = .005;
+real strain = C_STRAIN_RATE_MAG(c,t);
+real n_casson =0.0035;
 real mu_casson;
-real mu_inf_casson;
-real N_inf;
-real strain;
-
-strain = C_STRAIN_RATE_MAG(c,t);
-mu_inf_casson = pow(0.625*Hct,0.5);
-N_inf = pow(mu_p*pow((1-Hct),-0.25),0.5);
-
 
 	if (strain == 0.)
-		mu_casson = pow(N_inf,2);
+		mu_casson = n_casson;
 	else
 	{
-		mu_casson = pow(mu_inf_casson,2)/strain+2*mu_inf_casson*N_inf/pow(strain,0.5)+pow(N_inf,2);
+		mu_casson = yield_stress/strain + pow(n_casson*yield_stress,.5)/pow(strain,0.5)+n_casson;
 	}
 
 return mu_casson;
@@ -61,8 +54,15 @@ DEFINE_PROPERTY(Power_model,c,t)
 real k_pow = 0.017;
 real n_pow = 0.708;
 real mu_pow;
+real strain = C_STRAIN_RATE_MAG(c,t);
 
-mu_pow = k_pow*pow(C_STRAIN_RATE_MAG(c,t),n_pow-1);
+	if (strain <= 0.05)
+		mu_pow = 0.04077084195415557;
+	else
+	{
+		mu_pow=k_pow*pow(strain,n_pow-1);
+	}
+
 return mu_pow;
 }
 
