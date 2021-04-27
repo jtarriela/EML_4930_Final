@@ -206,6 +206,20 @@ class blood_model_validation():
                     viscosity = bm.mod_cross(**Parameters_Cross)
                     sim_strain_df.loc[i, 'Cross Pa*sec'] = round(viscosity.magnitude, 8)
 
+            elif 'Power' in str(col_name):
+                for i in range(len(sim_strain_df)):
+                    Parameters_Power = {'n': Q_(0.708, 'dimensionless'),
+                                        'k': Q_(0.017, 'dimensionless'),
+                                        'strain': shear_time_list[i]}
+                    viscosity = bm.mod_power(**Parameters_Power)
+                    sim_strain_df.loc[i, 'Power Pa*sec'] = round(viscosity.magnitude, 8)
+
+            elif 'Newtownian' in str(col_name):
+                for i in range(len(sim_strain_df)):
+                    viscosity = 0.0035
+                    sim_strain_df.loc[i, 'Newtownian Pa*sec'] = viscosity
+
+
         self.output_df = sim_strain_df
         return self.output_df
 
@@ -232,23 +246,24 @@ class blood_model_validation():
         plt.ylabel('Velocity (m/sec)')
         plt.show()
 
-        return self.inlet_profile_df
+        # return self.inlet_profile_df
 
-    def plot_wss(self):
-        avg_wss = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw%20Data/avg_wss.csv')
+    def plot_wss(self,avg_wss):
+        avg_wss = avg_wss#pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw%20Data/avg_wss.csv')
         fig6 = plt.figure()
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['CY [ Pa ]'], 'y-', linewidth=2, label = "Carreau Yasuda")
+        plt.plot(avg_wss['Time [ s ]'], avg_wss['Carreau Yasuda [Pa]'], 'y-', linewidth=2, label = "Carreau Yasuda")
         plt.plot(avg_wss['Time [ s ]'], avg_wss['Cassion [ Pa ]'], 'k-', linewidth=2, label = 'Cassion')
         plt.plot(avg_wss['Time [ s ]'], avg_wss['Cross [ Pa ]'], 'r-', linewidth=2, label = 'Cross')
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Newtownian [ Pa ]'], 'g-', linewidth=2, label = 'Newtownian')
+        plt.plot(avg_wss['Time [ s ]'], avg_wss['Newtownian [Pa]'], 'g-', linewidth=2, label = 'Newtownian')
+        plt.plot(avg_wss['Time [ s ]'], avg_wss['Power [Pa]'], 'c-', linewidth=2, label='Power')
         plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
         plt.title('Average WSS vs Time')
         plt.xlabel('Time (sec)')
         plt.ylabel('WSS (Pascal)')
         plt.show()
 
-    def plot_mass_resid(self):
-        mass_resid = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw%20Data/net_mass_flow_rate.csv')
+    def plot_mass_resid(self, mass_resid_df):
+        mass_resid = mass_resid_df
         fig6 = plt.figure()
         plt.plot(mass_resid['Time [ s ]'], mass_resid['CY [ kg s^-1 ]'], 'y-', linewidth=2, label = "Carreau Yasuda")
         plt.plot(mass_resid['Time [ s ]'], mass_resid['Cassion [ kg s^-1 ]'], 'k-', linewidth=2, label = 'Cassion')
@@ -326,11 +341,19 @@ if __name__ == "__main__":
     # print(power)
 
     sim_strain_df = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Shear_stress_df.csv')
-
     sim_strain_visc_df = bm.compute_sim_viscosity(sim_strain_df)
-    #
-    # inlet_vel_df = bm.inlet_profile()
-    # bm.plot_wss()
-    # bm.plot_mass_resid()
-
+    # The following plots come from the sim_strain_visc_df
+    bm.plot_viscosity_vs_shear()
     bm.plot_viscosity_time()
+    bm.plot_shear_time()
+
+    # Inlet velocity df and profile auto computed
+    # inlet_vel_df = bm.inlet_profile()
+
+    # Mass resid stress plot
+    net_mass_flow_df = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    bm.plot_mass_resid(net_mass_flow_df)
+
+    # Wall shear stress plot
+    avg_wss_df =pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    bm.plot_wss(avg_wss_df)
