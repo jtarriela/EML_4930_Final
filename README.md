@@ -2,6 +2,6 @@
 ## Computational Fluid Dynamics
 ## Wenbin Mao
 
-Extracted time values from simulation runs 1 and 2.
-Core py script computes and plots data of interest.
-Notebook for visualization and notes.
+Extracted time values from simulation runs 1 and 2. <br>
+Core py script computes and plots data of interest. <br>
+Notebook for visualization and notes. <br>
