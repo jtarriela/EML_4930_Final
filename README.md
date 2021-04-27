@@ -1,7 +1,7 @@
-# FDA_Blood_Pump
-## Raw data for CFD runs
+# Project Repo EML 4930
+## Computational Fluid Dynamics
+## Wenbin Mao
 
-Parent folder contains Velocity_Processor.py
-  - takes array of urls and string for chart title as input arguments 
-
-Sub folders contain raw data, each sub folder contains its own pyscript calling on class in parent folder to plot.
+Extracted time values from simulation runs 1 and 2.
+Core py script computes and plots data of interest.
+Notebook for visualization and notes.
