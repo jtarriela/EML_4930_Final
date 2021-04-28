@@ -340,7 +340,7 @@ if __name__ == "__main__":
     # power=bm.mod_power(**Parameters_Power)
     # print(power)
 
-    sim_strain_df = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Shear_stress_df.csv')
+    sim_strain_df = pd.read_csv('xxx')
     sim_strain_visc_df = bm.compute_sim_viscosity(sim_strain_df)
     # The following plots come from the sim_strain_visc_df
     bm.plot_viscosity_vs_shear()
@@ -351,9 +351,9 @@ if __name__ == "__main__":
     # inlet_vel_df = bm.inlet_profile()
 
     # Mass resid stress plot
-    net_mass_flow_df = pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    net_mass_flow_df = pd.read_csv('xxx')
     bm.plot_mass_resid(net_mass_flow_df)
 
     # Wall shear stress plot
-    avg_wss_df =pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    avg_wss_df =pd.read_csv('https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
     bm.plot_wss(avg_wss_df)
