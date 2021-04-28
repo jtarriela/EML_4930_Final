@@ -1,4 +1,4 @@
-Time [ s ],Cassion [ Pa ],Cross [ Pa ],Carreau Yasuda [Pa],Newtownian [Pa],Power [Pa]
+Time [ s ],Cassion [ Pa ],Cross [ Pa ],CY [Pa],Newtownian [Pa],Power [Pa]
 1.51E+00,2.30E+00,7.76E-01,8.73E-01,2.22E+00,1.88E+00
 1.52E+00,2.93E+00,3.68E+00,8.72E-01,2.84E+00,2.28E+00
 1.53E+00,3.50E+00,3.46E+00,5.29E+00,3.41E+00,2.61E+00
