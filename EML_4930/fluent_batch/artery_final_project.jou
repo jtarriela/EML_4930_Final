@@ -53,5 +53,11 @@
 
 /file/write-case-data "Newtownian_Transient_Norm.cas.h5"
 
+file/transient-export/cdat-for-cfd-post-&-ensight 'export_newt_hi' inlet outlet1 outlet2 walls () art1right () pressure pressure-coefficient dynamic-pressure absolute-pressure total-pressure velocity-magnitude x-velocity y-velocity z-velocity axial-velocity radial-velocity tangential-velocity strain-rate wall () yes no "export-1" "time-step" 1 time-step
+
+/solve/set/time-step 0.01 ;time step size (seconds/step)
+/solve/set/max-iterations-per-time-step 200
+/solve/set/reporting-interval 1
+/solve/dual-time-iterate 50 200 ;[max timesteps, iterations per step]
 
 exit
