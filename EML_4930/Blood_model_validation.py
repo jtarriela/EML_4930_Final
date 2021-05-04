@@ -131,9 +131,6 @@ class blood_model_validation():
         del self.Parameters_Casson_1["strain"]
         del self.Parameters_Casson_2["strain"]
         del self.Parameters_Power["strain"]
-
-        self.plot_experimental_visc_shear()
-
         return self.df
 
     def plot_experimental_visc_shear(self):
@@ -142,19 +139,16 @@ class blood_model_validation():
                       markersize=2, label="Carreau Yasuda")
         cr = plt.plot(self.df['Strain (Pascal)'], self.df['Cross'], 'bo-', linewidth=1, markersize=2,
                       label="Cross")
-        ca1 = plt.plot(self.df['Strain (Pascal)'], self.df['Casson_1'], 'm--', linewidth=1, markersize=2,
-                       label="Casson (1)")
+        # ca1 = plt.plot(self.df['Strain (Pascal)'], self.df['Casson_1'], 'm--', linewidth=1, markersize=2,
+        #                label="Casson (1)")
         ca2 = plt.plot(self.df['Strain (Pascal)'], self.df['Casson_2'], '^k', linewidth=1, markersize=2,
                        label="Casson (2)")
         pw = plt.plot(self.df['Strain (Pascal)'], self.df['Power'], 'ro--', linewidth=1, markersize=2,
                       label="Power")
-
         plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
         plt.title('Blood Model Viscosity vs Shear Rate')
         plt.ylabel('Viscosity (Pa*sec)')
         plt.xlabel('Shear Rate (1/sec)')
-
-
         plt.show()
 
     def compute_sim_viscosity(self, df):
@@ -169,7 +163,7 @@ class blood_model_validation():
         # sim_visc_df = sim_strain_df['Time [ s ]'].copy() ## Rename column to flowtime
         # sim_visc_df = sim_visc_df.rename("Flow Time", axis='columns')
         for i in range(len(column_list)):
-            print(column_list[i])
+            # print(column_list[i])
             col_name = column_list[i]
 
             shear_time_list = sim_strain_df[col_name].tolist()
@@ -177,11 +171,11 @@ class blood_model_validation():
             if 'Casson' in str(col_name):  ##### Case Sensitive
                 # print('Casson to be computed')
                 for i in range(len(sim_strain_df)):
-                    Parameters_Casson_1 = {'mu_p': Q_(0.00145, 'dimensionless'),
-                                           'hematocrit': Q_(0.4, 'dimensionless'),
+                    Parameters_Casson_2 = {'yield_stress': Q_(0.005, 'pascal'),
+                                           'n': Q_(0.0035, 'pascal*second'),
                                            'strain': shear_time_list[i]}
 
-                    viscosity = bm.mod_casson_1(**Parameters_Casson_1)
+                    viscosity = bm.mod_casson_2(**Parameters_Casson_2)
                     sim_strain_df.loc[i, 'Casson Pa*sec'] = round(viscosity.magnitude, 8)
 
             elif 'CY' in str(col_name):
@@ -248,72 +242,78 @@ class blood_model_validation():
 
         # return self.inlet_profile_df
 
-    def plot_wss(self,avg_wss):
-        avg_wss = avg_wss#pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw%20Data/avg_wss.csv')
-        fig6 = plt.figure()
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Carreau Yasuda [Pa]'], 'y-', linewidth=2, label = "Carreau Yasuda")
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Cassion [ Pa ]'], 'k-', linewidth=2, label = 'Cassion')
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Cross [ Pa ]'], 'r-', linewidth=2, label = 'Cross')
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Newtownian [Pa]'], 'g-', linewidth=2, label = 'Newtownian')
-        plt.plot(avg_wss['Time [ s ]'], avg_wss['Power [Pa]'], 'c-', linewidth=2, label='Power')
-        plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
-        plt.title('Average WSS vs Time')
-        plt.xlabel('Time (sec)')
-        plt.ylabel('WSS (Pascal)')
-        plt.show()
-
-    def plot_mass_resid(self, mass_resid_df):
-        mass_resid = mass_resid_df
-        fig6 = plt.figure()
-        plt.plot(mass_resid['Time [ s ]'], mass_resid['CY [ kg s^-1 ]'], 'y-', linewidth=2, label = "Carreau Yasuda")
-        plt.plot(mass_resid['Time [ s ]'], mass_resid['Cassion [ kg s^-1 ]'], 'k-', linewidth=2, label = 'Cassion')
-        plt.plot(mass_resid['Time [ s ]'], mass_resid['Cross [ kg s^-1 ]'], 'r-', linewidth=2, label = 'Cross')
-        plt.plot(mass_resid['Time [ s ]'], mass_resid['Newtownian [ kg s^-1 ]'], 'g-', linewidth=2, label = 'Newtownian')
-        plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
-        plt.title('Mass Residual vs Time')
-        plt.xlabel('Time (sec)')
-        plt.ylabel('Net Mass Flow Rate (kg/s)')
-        plt.show()
-
-    def plot_viscosity_time(self):
-        fig2 = plt.figure()
-        x_axis = self.output_df['Time [ s ]']
-        plt.plot(x_axis, self.output_df['CY Pa*sec'], 'go--', linewidth=1, markersize=2, label="Carreau Yasuda")
-        plt.plot(x_axis, self.output_df['Cross Pa*sec'], 'b--', linewidth=1, markersize=2, label="Cross")
-        plt.plot(x_axis, self.output_df['Casson Pa*sec'], 'm--', linewidth=1, markersize=2, label="Casson (1)")
-        plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
-        plt.title('Simulation Viscosity per Time Step')
-        plt.ylabel('Viscosity (Pa*sec)')
-        plt.xlabel('Time (sec)')
-        plt.show()
-
-    def plot_shear_time(self):
-        fig3 = plt.figure()
-        x_axis = self.output_df['Time [ s ]']
-        plt.plot(x_axis, self.output_df['CY  [ s^-1 ]'], 'go-', linewidth=1, markersize=2, label="Carreau Yasuda")
-        plt.plot(x_axis, self.output_df['Cross  [ s^-1 ]'], 'b-', linewidth=1, markersize=2, label="Cross")
-        plt.plot(x_axis, self.output_df['Casson  [ s^-1 ]'], 'm-', linewidth=1, markersize=2, label="Casson (1)")
-        plt.plot(x_axis, self.output_df['Newtownian  [ s^-1 ]'], 'c-', linewidth=1, markersize=2, label="Newtownian")
-        plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
-        plt.title('Average Fluid Shear Rate per Time Step')
-        plt.ylabel('Shear Rate (1/s)')
-        plt.xlabel('Time (sec)')
-        plt.show()
-
-    def plot_viscosity_vs_shear(self):
-        fig4 = plt.figure()
-        x_axis = self.output_df['Time [ s ]']
-        plt.plot(self.output_df['CY  [ s^-1 ]'], self.output_df['CY Pa*sec'], 'go', linewidth=1, markersize=5,
-                 label="Carreau Yasuda")
-        plt.plot(self.output_df['Cross  [ s^-1 ]'], self.output_df['Cross Pa*sec'], 'bo', linewidth=1, markersize=5,
-                 label="Cross")
-        plt.plot(self.output_df['Casson  [ s^-1 ]'], self.output_df['Casson Pa*sec'], 'mo', linewidth=1, markersize=5,
-                 label="Casson (1)")
-        plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
-        plt.title('Viscosity vs Shear Rate')
-        plt.xlabel('Shear Rate (1/s)')
-        plt.ylabel('Viscosity (Pa*s)')
-        plt.show()
+    # def plot_wss(self,avg_wss):
+    #     avg_wss = avg_wss #pd.read_csv('https://raw.githubusercontent.com/jtarriela/FDA_Blood_Pump/EML_4930/EML_4930/Data/Raw%20Data/avg_wss.csv')
+    #     fig6 = plt.figure()
+    #     plt.plot(avg_wss['Time [ s ]'], avg_wss['Carreau Yasuda [Pa]'], 'y-', linewidth=2, label = "Carreau Yasuda")
+    #     plt.plot(avg_wss['Time [ s ]'], avg_wss['Cassion [ Pa ]'], 'k-', linewidth=2, label = 'Cassion')
+    #     plt.plot(avg_wss['Time [ s ]'], avg_wss['Cross [ Pa ]'], 'r-', linewidth=2, label = 'Cross')
+    #     plt.plot(avg_wss['Time [ s ]'], avg_wss['Newtownian [Pa]'], 'g-', linewidth=2, label = 'Newtownian')
+    #     plt.plot(avg_wss['Time [ s ]'], avg_wss['Power [Pa]'], 'c-', linewidth=2, label='Power')
+    #     plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    #     plt.title('Average WSS vs Time')
+    #     plt.xlabel('Time (sec)')
+    #     plt.ylabel('WSS (Pascal)')
+    #     plt.show()
+    #
+    # def plot_mass_resid(self, mass_resid_df):
+    #     mass_resid = mass_resid_df
+    #     fig6 = plt.figure()
+    #     plt.plot(mass_resid['Time [ s ]'], mass_resid['CY [ kg s^-1 ]'], 'y-', linewidth=2, label = "Carreau Yasuda")
+    #     plt.plot(mass_resid['Time [ s ]'], mass_resid['Cassion [ kg s^-1 ]'], 'k-', linewidth=2, label = 'Cassion')
+    #     plt.plot(mass_resid['Time [ s ]'], mass_resid['Cross [ kg s^-1 ]'], 'r-', linewidth=2, label = 'Cross')
+    #     plt.plot(mass_resid['Time [ s ]'], mass_resid['Newtownian [ kg s^-1 ]'], 'g-', linewidth=2, label = 'Newtownian')
+    #     plt.plot(mass_resid['Time [ s ]'], mass_resid['Power [ kg s^-1 ]'], 'c-', linewidth=2, label='Power')
+    #     plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    #     plt.title('Mass Residual vs Time')
+    #     plt.xlabel('Time (sec)')
+    #     plt.ylabel('Net Mass Flow Rate (kg/s)')
+    #     plt.show()
+    #
+    # def plot_viscosity_time(self):
+    #     fig2 = plt.figure()
+    #     x_axis = self.output_df['Time [ s ]']
+    #     plt.plot(x_axis, self.output_df['CY Pa*sec'], 'go--', linewidth=1, markersize=2, label="Carreau Yasuda")
+    #     plt.plot(x_axis, self.output_df['Cross Pa*sec'], 'b--', linewidth=1, markersize=2, label="Cross")
+    #     plt.plot(x_axis, self.output_df['Casson Pa*sec'], 'm--', linewidth=1, markersize=2, label="Casson")
+    #     plt.plot(x_axis, self.output_df['Newtownian Pa*sec'], 'g--', linewidth=1, label = 'Newtownian')
+    #     plt.plot(x_axis, self.output_df['Power Pa*sec'], 'c--', linewidth=1, label='Power')
+    #     plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    #     plt.title('Simulation Viscosity per Time Step')
+    #     plt.ylabel('Viscosity (Pa*sec)')
+    #     plt.xlabel('Time (sec)')
+    #     plt.show()
+    #
+    # def plot_shear_time(self):
+    #     fig3 = plt.figure()
+    #     x_axis = self.output_df['Time [ s ]']
+    #     plt.plot(x_axis, self.output_df['CY  [ s^-1 ]'], 'go-', linewidth=1, markersize=2, label="Carreau Yasuda")
+    #     plt.plot(x_axis, self.output_df['Cross  [ s^-1 ]'], 'b-', linewidth=1, markersize=2, label="Cross")
+    #     plt.plot(x_axis, self.output_df['Casson  [ s^-1 ]'], 'm-', linewidth=1, markersize=2, label="Casson")
+    #     plt.plot(x_axis, self.output_df['Newtownian  [ s^-1 ]'], 'c-', linewidth=1, markersize=2, label="Newtownian")
+    #     plt.plot(x_axis, self.output_df['Power [ s^-1 ]'], 'y-', linewidth=1,  markersize=2,label='Power')
+    #     plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    #     plt.title('Average Fluid Shear Rate per Time Step')
+    #     plt.ylabel('Shear Rate (1/s)')
+    #     plt.xlabel('Time (sec)')
+    #     plt.show()
+    #
+    # def plot_viscosity_vs_shear(self):
+    #     fig4 = plt.figure()
+    #     x_axis = self.output_df['Time [ s ]']
+    #     plt.plot(self.output_df['CY  [ s^-1 ]'], self.output_df['CY Pa*sec'], 'go', linewidth=1, markersize=5,
+    #              label="Carreau Yasuda")
+    #     plt.plot(self.output_df['Cross  [ s^-1 ]'], self.output_df['Cross Pa*sec'], 'bo', linewidth=1, markersize=5,
+    #              label="Cross")
+    #     plt.plot(self.output_df['Casson  [ s^-1 ]'], self.output_df['Casson Pa*sec'], 'mo', linewidth=1, markersize=5,
+    #              label="Casson")
+    #     plt.plot(x_axis, self.output_df['Newtownian  [ s^-1 ]'], 'co', linewidth=1, markersize=5, label="Newtownian")
+    #     plt.plot(x_axis, self.output_df['Power [ s^-1 ]'], 'yo', linewidth=2, markersize=5,label='Power')
+    #     plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    #     plt.title('Viscosity vs Shear Rate')
+    #     plt.xlabel('Shear Rate (1/s)')
+    #     plt.ylabel('Viscosity (Pa*s)')
+    #     plt.show()
 
 
 
@@ -323,15 +323,15 @@ if __name__ == "__main__":
 
     ##### DO NOT DELETE THIS CODE BLOCK #####
     ##### KWARG DEMO OF CLASS INPUT #####
-    shear_range = np.arange(1,500)
-    #
-    Parameters_BM_Class = {'Q_': Q_,
-                           'strain': 450, # Pass universal strain for all models
-                           'strain_range': shear_range,
-                           'mu_0': 0.056,
-                           'mu_inf': 0.0035}
-    bm = blood_model_validation(**Parameters_BM_Class)
-    predicted_mu = bm.mu_calculations()
+    # shear_range = np.arange(1,500)
+    # #
+    # Parameters_BM_Class = {'Q_': Q_,
+    #                        'strain': 450, # Pass universal strain for all models
+    #                        'strain_range': shear_range,
+    #                        'mu_0': 0.056,
+    #                        'mu_inf': 0.0035}
+    # bm = blood_model_validation(**Parameters_BM_Class)
+    # predicted_mu = bm.mu_calculations()
     #####--------------------------------#####
 
     # Parameters_Power = {'n': Q_(0.708, 'dimensionless'),
@@ -340,20 +340,64 @@ if __name__ == "__main__":
     # power=bm.mod_power(**Parameters_Power)
     # print(power)
 
-    sim_strain_df = pd.read_csv('xxx')
-    sim_strain_visc_df = bm.compute_sim_viscosity(sim_strain_df)
+    # sim_strain_df = pd.read_csv('xxx')
+    # sim_strain_visc_df = bm.compute_sim_viscosity(sim_strain_df)
     # The following plots come from the sim_strain_visc_df
-    bm.plot_viscosity_vs_shear()
-    bm.plot_viscosity_time()
-    bm.plot_shear_time()
+    # bm.plot_viscosity_vs_shear()
+    # bm.plot_viscosity_time()
+    # bm.plot_shear_time()
 
     # Inlet velocity df and profile auto computed
     # inlet_vel_df = bm.inlet_profile()
 
     # Mass resid stress plot
-    net_mass_flow_df = pd.read_csv('xxx')
-    bm.plot_mass_resid(net_mass_flow_df)
+    # net_mass_flow_df = pd.read_csv('xxx')
+    # bm.plot_mass_resid(net_mass_flow_df)
 
-    # Wall shear stress plot
-    avg_wss_df =pd.read_csv('https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
-    bm.plot_wss(avg_wss_df)
+    # # Wall shear stress plot
+    # avg_wss_df =pd.read_csv('https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    # bm.plot_wss(avg_wss_df)
+
+
+    # domain_sim_strain_df = pd.read_csv('https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Domain_Average_Strain_Rate.csv')
+    # domain_sim_strain_visc_df = bm.compute_sim_viscosity(domain_sim_strain_df)
+
+
+    # bm.plot_viscosity_time()
+    # bm.plot_shear_time()
+    # bm.plot_viscosity_vs_shear()
+
+    shear_range = np.arange(100, 1000)
+    Parameters_BM_Class = {'Q_': Q_,
+                           'strain': 450,  # Pass universal strain for all models
+                           'strain_range': shear_range,
+                           'mu_0': 0.056,
+                           'mu_inf': 0.0035}
+
+    bm = blood_model_validation(**Parameters_BM_Class)
+
+    predicted_mu = bm.mu_calculations()
+
+    domain_sim_strain_df = pd.read_csv(
+        'https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Domain_Average_Strain_Rate.csv')
+    domain_sim_strain_visc_df = bm.compute_sim_viscosity(domain_sim_strain_df)
+
+    net_mass_flow_df = pd.read_csv(
+        'https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Mass_Flow_Residuals.csv')
+    # bm.plot_mass_resid(net_mass_flow_df)
+    avg_wss_df = pd.read_csv(
+        'https://raw.githubusercontent.com/jtarriela/EML_4930_Final/EML_4930/EML_4930/Data/Raw_Data_2/Average_Wall_Shear_Stress_vs_Time.csv')
+    # bm.plot_wss(avg_wss_df)
+
+    plt.figure()
+    plt.plot(avg_wss_df['Time [ s ]'], avg_wss_df['Cassion [ Pa ]'], 'b-', linewidth=2, label="Casson")
+    plt.plot(avg_wss_df['Time [ s ]'], avg_wss_df['Cross [ Pa ]'], 'k-', linewidth=2, label='Cross')
+    plt.plot(avg_wss_df['Time [ s ]'], avg_wss_df['CY [Pa]'], 'r-', linewidth=2, label='Carreau Yasuda')
+    plt.plot(avg_wss_df['Time [ s ]'], avg_wss_df['Newtownian [Pa]'], 'g-', linewidth=2, label='Newtownian')
+    plt.plot(avg_wss_df['Time [ s ]'], avg_wss_df['Power [Pa]'], 'c-', linewidth=2, label='Power')
+    plt.legend(loc="upper right", fontsize='medium', frameon=True, shadow=True)
+    plt.title('Average Wall Shear Stress')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Wall Shear Stress (Pa)')
+    plt.show()
+
